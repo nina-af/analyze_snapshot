@@ -5,7 +5,7 @@ import numpy as np
 import os
 import sys
 
-import analyze_snapshot.analyze_snapshot as snap
+import analyze_snapshot as snap
 
 # Unit conversions.
 unit_length_in_cm         = 3.085678e18  # 1 pc
