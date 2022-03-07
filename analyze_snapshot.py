@@ -7,14 +7,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 
-import yt
-import unyt
-#import os
-
-# from utils.orbits import elements_from_state_vector
-# from utils.orbits import orbits
-
-from .orbits import angular_momentum, node_vector, eccentricity_vector, specific_orbital_energy, elements_from_state_vector
+from orbits import angular_momentum, node_vector, eccentricity_vector, specific_orbital_energy, elements_from_state_vector
 
 class analyze_snapshot:
     "Class for analyzing snapshot hdf5 data."
