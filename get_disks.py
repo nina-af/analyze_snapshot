@@ -50,15 +50,15 @@ def get_system_disk(s, sm, sx, sv, max_rad, mask, verbose=False):
     # Sort all gas particles by distance to system center of mass.
     idx_sorted, r_sorted = s.sort_indices_by_distance_from_point(sys_x[0], sys_x[1], sys_x[2])
     ids_sorted  = s.p0_ids[idx_sorted]
-    mask_sorted = mask[idx_sorted]
     
     # Consider only those particles which are included in the mask. To speed up loops, exclude 
     # all particles beyond r_ter from the mask.
     max_idx = np.argmax(r_sorted > r_ter)
-    mask[idx_sorted[max_idx:-1]] = False
+    mask[idx_sorted[max_idx:]] = False
+    mask_sorted = mask[idx_sorted]
 
-    g_sort = ids_sorted[mask_sorted][0:max_idx]  # Sorted particle IDs.
-    g_idx  = idx_sorted[mask_sorted][0:max_idx]  # Sorted particle indices.
+    g_sort = ids_sorted[mask_sorted]  # Sorted particle IDs.
+    g_idx  = idx_sorted[mask_sorted]  # Sorted particle indices.
     
     print('Number of gas particles to loop over: {0:d}'.format(len(g_sort)))
 
@@ -77,7 +77,6 @@ def get_system_disk(s, sm, sx, sv, max_rad, mask, verbose=False):
         
         # Particle distance from system center of mass.
         p_r  = s.get_distance_from_point(sys_x_new[0], sys_x_new[1], sys_x_new[2], p_id) 
-        #p_r2 = s.get_distance_from_point(sys_x_new[0], sys_x_new[1], sys_x_new[2], g_sort[1]) 
     
         if verbose:
             print('Current particle: {0:d} [{1:d}] (r = {2:.8e})'.format(p_id, p_idx, p_r))
@@ -132,10 +131,9 @@ def get_system_disk(s, sm, sx, sv, max_rad, mask, verbose=False):
         idx_sorted, r_sorted = s.sort_indices_by_distance_from_point(sys_x[0], sys_x[1], sys_x[2])
         ids_sorted  = s.p0_ids[idx_sorted]
         mask_sorted = mask[idx_sorted]
-        
-        max_idx = np.argmax(r_sorted > r_ter)
-        g_sort = ids_sorted[mask_sorted][0:max_idx]  # Sorted particle IDs.
-        g_idx  = idx_sorted[mask_sorted][0:max_idx]  # Sorted particle indices.
+   
+        g_sort = ids_sorted[mask_sorted]  # Sorted particle IDs.
+        g_idx  = idx_sorted[mask_sorted]  # Sorted particle indices.
         
         if verbose:
             print('----------------------------------------------\n')
@@ -145,7 +143,7 @@ def get_system_disk(s, sm, sx, sv, max_rad, mask, verbose=False):
         
         k += 1
         
-    print('k = {0:d}: final particle: r = {1:.8e} AU'.format(k, p_r * pc_to_au))
+    print('k = {0:d}: final particle: r = {1:.8e} pc = {2:.8e} AU'.format(k, p_r, p_r * pc_to_au))
         
     d_ids  = np.asarray(disk_ids, dtype=int)
     nd_ids = np.asarray(not_disk_ids, dtype=int)
@@ -195,8 +193,8 @@ for i in range(41):
     trip_m, trip_x, trip_v = s.two_body_center_of_mass(bin_m, bin_x, bin_v, 
                                                        ms3, pos_s3, vel_s3)
     
-    # Get disk around disk 3.
-    r_max = np.sqrt(np.sum((bin_x - pos_s3)**2)) * pc_to_au  # AU
+    r_max0 = np.sqrt(np.sum((bin_x - pos_s3)**2)) * pc_to_au  # AU
+    r_max = np.minimum(r_max0, 2000.0)
     mask  = np.full(len(s.p0_ids), True, dtype=bool)
     
     # Get disk around sink 3.
@@ -216,9 +214,13 @@ for i in range(41):
     print('Getting circum-multiple disk...')
     all_disk_ids = np.union1d(disk_ids_3, disk_ids_cb)
     mask_sys = np.isin(s.p0_ids, all_disk_ids, invert=True)
-    gas_sys_m, gas_sys_x, gas_sys_v = s.gas_system_center_of_mass(all_disk_ids)
-    sys_m, sys_x, sys_v = s.two_body_center_of_mass(trip_m, trip_x, trip_v, 
-                                                    gas_sys_m, gas_sys_x, gas_sys_v)
+    
+    if len(all_disk_ids) > 0:
+        gas_sys_m, gas_sys_x, gas_sys_v = s.gas_system_center_of_mass(all_disk_ids)
+        sys_m, sys_x, sys_v = s.two_body_center_of_mass(trip_m, trip_x, trip_v, 
+                                                        gas_sys_m, gas_sys_x, gas_sys_v)
+    else:
+        sys_m, sys_x, sys_v = trip_m, trip_x, trip_v
     
     r_max = 2000.0  # AU
     disk_ids_trip, not_disk_trip, ex_disk_trip = get_system_disk(s, sys_m, sys_x, sys_v, r_max, mask_sys)
