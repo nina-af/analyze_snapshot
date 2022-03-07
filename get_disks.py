@@ -5,7 +5,7 @@ import numpy as np
 import os
 import sys
 
-import analyze_snapshot as snap
+import analyze_snapshot.analyze_snapshot as snap
 
 # Unit conversions.
 unit_length_in_cm         = 3.085678e18  # 1 pc
@@ -157,7 +157,7 @@ for i in range(41):
     
     print('\n SNAPSHOT_273_{0:03d}: getting disks...'.format(i))
     
-    fname = os.path.join(basedir, 'snapshot_273_{0:03d}.hdf5'.format(i))
+    fname = os.path.join(basedir, 'snapshot_273_{0:03d}'.format(i))
     
     fname_3 = os.path.join(outputdir, 'snapshot_273_{0:03d}_disk_ids_3.txt'.format(i))
     fname_b = os.path.join(outputdir, 'snapshot_273_{0:03d}_disk_ids_b.txt'.format(i))
