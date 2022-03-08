@@ -68,6 +68,11 @@ def get_system_disk(s, sm, sx, sv, max_rad, mask, verbose=False):
 
     # Loop over gas particles until r_ter is reached.
     k = 0; num_g = len(g_sort)
+    
+    # Break if no gas particles to loop over.
+    if num_g == 0:
+        return np.asarray(disk_ids), np.asarray(not_disk_ids), np.asarray(examined_ids)
+    
     while k < num_g:
     
         sys_m_new, sys_x_new, sys_v_new = sys_m, sys_x, sys_v
