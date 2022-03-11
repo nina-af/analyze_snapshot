@@ -150,6 +150,22 @@ class analyze_snapshot:
         
         return r
     
+    # Calculate relative distance from point (x0, y0, z0) for all
+    # gas particles specified by gas_ids.
+    def get_distances_from_point(self, x0, y0, z0, gas_ids):
+        
+        # Indices corresponding to chosen gas ids.
+        idx_g = np.isin(self.p0_ids, gas_ids)
+        
+        # Relative position.
+        x_rel = self.p0_x[idx_g] - x0
+        y_rel = self.p0_y[idx_g] - y0
+        z_rel = self.p0_z[idx_g] - z0
+        r     = np.sqrt(x_rel**2 + y_rel**2 + z_rel**2)
+        
+        return r
+        
+    
     # Determine whether gas particles are individually gravitationally bound to a
     # system with mass mc and coordinates (xc, yc, zc), (uc, vc, wc).
     def is_gravitationally_bound_to_system(self, mc, xc, yc, zc, uc, vc, wc, gas_id):
